@@ -270,6 +270,18 @@
   <data name="MessageBird_WhatsAppTemplateNamespaceLabel" xml:space="preserve">
     <value>Template Namespace</value>
   </data>
+  <data name="SMSGateway_description" xml:space="preserve">
+    <value>SMSGateway_description</value>
+  </data>
+  <data name="SMSGateway_IpAddress" xml:space="preserve">
+    <value>SMSGateway_IpAddress</value>
+  </data>
+  <data name="SMSGateway_name" xml:space="preserve">
+    <value>SMSGateway_name</value>
+  </data>
+  <data name="SMSGateway_PhoneNumber" xml:space="preserve">
+    <value>SMSGateway_PhoneNumber</value>
+  </data>
   <data name="SMTP_Description" xml:space="preserve">
     <value>Send emails using a custom email server.</value>
   </data>

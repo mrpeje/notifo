@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Notifo.Areas.Api.Controllers.Notifications;
 using Notifo.Areas.Frontend;
 using Notifo.Domain;
+using Notifo.Domain.Integrations.SMSGyteway;
 using Notifo.Domain.Utils;
 using Notifo.Pipeline;
 
@@ -158,6 +159,7 @@ public class Startup
         services.AddIntegrationTelegram();
         services.AddIntegrationThreema();
         services.AddIntegrationTwilio();
+        services.AddIntegrationSMSGateways();
 
         services.AddInitializer();
         services.AddBackgroundProcesses();

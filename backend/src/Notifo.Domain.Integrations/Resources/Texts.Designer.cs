@@ -979,5 +979,46 @@ namespace Notifo.Domain.Integrations.Resources {
                 return ResourceManager.GetString("Webhook_URLLabel", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SMS Gateway IpAddress.
+        /// </summary>
+        internal static string SMSGateway_IpAddress{
+            get
+            {
+                return ResourceManager.GetString("SMSGateway_IpAddress", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SMS Gateway PhoneNumber.
+        /// </summary>
+        internal static string SMSGateway_PhoneNumber{
+            get
+            {
+                return ResourceManager.GetString("SMSGateway_PhoneNumber", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SMS Gateway description.
+        /// </summary>
+        internal static string SMSGateway_description{
+            get
+            {
+                return ResourceManager.GetString("SMSGateway_description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SMS Gateway name.
+        /// </summary>
+        internal static string SMSGateway_name
+        {
+            get
+            {
+                return ResourceManager.GetString("SMSGateway_name", resourceCulture);
+            }
+        }
     }
 }
