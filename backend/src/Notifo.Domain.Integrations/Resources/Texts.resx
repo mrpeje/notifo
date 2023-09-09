@@ -271,16 +271,19 @@
     <value>Template Namespace</value>
   </data>
   <data name="SMSGateway_description" xml:space="preserve">
-    <value>SMSGateway_description</value>
+    <value>SMS Gateways settings</value>
   </data>
-  <data name="SMSGateway_IpAddress" xml:space="preserve">
-    <value>SMSGateway_IpAddress</value>
+  <data name="SMSGateway_Enabled" xml:space="preserve">
+    <value>SMSGateway_Enabled</value>
+  </data>
+  <data name="SMSGateway_Login" xml:space="preserve">
+    <value>SMSGateway_Login</value>
   </data>
   <data name="SMSGateway_name" xml:space="preserve">
-    <value>SMSGateway_name</value>
+    <value>SMS Gateways integration</value>
   </data>
-  <data name="SMSGateway_PhoneNumber" xml:space="preserve">
-    <value>SMSGateway_PhoneNumber</value>
+  <data name="SMSGateway_Password" xml:space="preserve">
+    <value>SMSGateway_Password</value>
   </data>
   <data name="SMTP_Description" xml:space="preserve">
     <value>Send emails using a custom email server.</value>

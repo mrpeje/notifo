@@ -1,10 +1,4 @@
-﻿using MongoDB.Driver.Core.WireProtocol.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
 
 namespace Notifo.Domain.Integrations.SMSGyteway;
 
@@ -13,14 +7,46 @@ public sealed partial class SMSGatewaysIntegration : ISmsSender // , IIntegratio
     public async Task<DeliveryResult> SendAsync(IntegrationContext context, SmsMessage message,
         CancellationToken ct)
     {
-        using (var httpClient = httpClientFactory.CreateClient("SMSGateway"))
+        // Init and get avalible gateways
+        IEnumerable<ISMSGateway> gateways = GetGateways(context);
+        // Get gateway by rulles
+        var gateway = smsGatewaysRouter.RouteMessage(message, gateways, ct);
+        // Send SMS via gateway
+        var response = await gateway.SendSMSAsync(message);
+
+        return response;
+    }
+
+    private IEnumerable<ISMSGateway> GetGateways(IntegrationContext context)
+    {
+        List<ISMSGateway> gatewayList = new List<ISMSGateway>();
+        var isEnabledXML = EnabledXMLProperty.GetBoolean(context.Properties);
+        if (isEnabledXML)
         {
-            //var responseMessage = await httpClient.PostAsJsonAsync("http://localhost:1337/api/objects/2", request, ct);
-            //var response = await httpClient.GetStringAsync("http://localhost:1337/api/objects/2");
-            //responseMessage.EnsureSuccessStatusCode();
-            //var responses = await responseMessage.Content.ReadFromJsonAsync<ResponseMessage[]>(cancellationToken: ct);
-            DeliveryResult result2 = default(DeliveryResult);
-            return result2;
+            xmlGateway.Login = LoginXMLProperty.GetString(context.Properties);
+            xmlGateway.Password = PasswordXMLProperty.GetString(context.Properties);
+            xmlGateway.From = FromProperty.GetString(context.Properties);
+            gatewayList.Add(xmlGateway);
         }
+
+        var isEnabledSMSC = EnabledSMSCProperty.GetBoolean(context.Properties);
+        if (isEnabledSMSC)
+        {
+            smscGateway.Login = LoginSMSCProperty.GetString(context.Properties);
+            smscGateway.Password = PasswordSMSCProperty.GetString(context.Properties);
+            smscGateway.From = FromProperty.GetString(context.Properties);
+            gatewayList.Add(smscGateway);
+        }
+
+        var isEnabledIntelTele = EnabledIntelTeleProperty.GetBoolean(context.Properties);
+        if (isEnabledIntelTele)
+        {
+            intelTeleGateway.Login = LoginIntelTeleProperty.GetString(context.Properties);
+            intelTeleGateway.Password = PasswordIntelTeleProperty.GetString(context.Properties);
+            intelTeleGateway.From = FromProperty.GetString(context.Properties);
+            gatewayList.Add(intelTeleGateway);
+        }
+
+        return gatewayList.AsEnumerable();
     }
 }
