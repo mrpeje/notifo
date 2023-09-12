@@ -18,22 +18,22 @@ public sealed partial class SMSGatewaysIntegration : IIntegration
         EditorDescription = null,
         IsRequired = true,
     };
-    public static readonly IntegrationProperty LoginXMLProperty = new IntegrationProperty("LoginXML", PropertyType.Number)
+    public static readonly IntegrationProperty LoginXMLProperty = new IntegrationProperty("LoginXML", PropertyType.Text)
     {
-        EditorLabel = Texts.SMSGateway_Login,
-        EditorDescription = null,
+        EditorLabel = "Login",
+        EditorDescription = "Login for XML gateway",
         IsRequired = false,
         Summary = true
     };
     public static readonly IntegrationProperty PasswordXMLProperty = new IntegrationProperty("PasswordXML", PropertyType.Text)
     {
-        EditorLabel = Texts.SMSGateway_Password,
-        EditorDescription = null,
+        EditorLabel = "Password",
+        EditorDescription = "Password for XML gateway",
         IsRequired = false,
     };
     public static readonly IntegrationProperty EnabledXMLProperty = new IntegrationProperty("EnabledXML", PropertyType.Boolean)
     {
-        EditorLabel = Texts.SMSGateway_Enabled,
+        EditorLabel = "XML gateway Enabled",
         EditorDescription = null,
         IsRequired = false,
     };
