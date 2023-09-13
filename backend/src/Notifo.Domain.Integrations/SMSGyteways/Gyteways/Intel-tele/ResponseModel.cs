@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 
 namespace Notifo.Domain.Integrations.SMSGyteways.Gyteways.Intel_tele;
-public class ReplyModel
+public class ResponseModel
 {
     [JsonProperty("reply")]
     public List<Response> Reply { get; set; }

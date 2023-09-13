@@ -34,20 +34,22 @@ public class IntelTeleGateway : ISMSGateway
             var response = await httpClient.GetAsync(urlWithParams);
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            var responseBody = Newtonsoft.Json.JsonConvert.DeserializeObject<ReplyModel>(responseContent);
+            var responseBody = Newtonsoft.Json.JsonConvert.DeserializeObject<ResponseModel>(responseContent);
             if (responseBody != null && responseBody.Reply.Count > 0)
             {
                 // Process the first response, since there is only 1 number in the request
                 var reply = responseBody.Reply.FirstOrDefault();
-
-                if (reply != null && reply.Status.Contains("OK", StringComparison.Ordinal))
+                if (reply != null)
                 {
-                    return DeliveryResult.Sent;
-                }
+                    if (reply.Status.Contains("OK", StringComparison.Ordinal))
+                    {
+                        return DeliveryResult.Sent;
+                    }
 
-                if (reply != null && reply.Status.Contains("error", StringComparison.Ordinal))
-                {
-                    return DeliveryResult.Failed(responseContent);
+                    if (reply.Status.Contains("error", StringComparison.Ordinal))
+                    {
+                        return DeliveryResult.Failed(responseContent);
+                    }
                 }
             }
 
