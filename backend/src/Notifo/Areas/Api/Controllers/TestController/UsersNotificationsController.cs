@@ -8,7 +8,7 @@ using Notifo.Infrastructure.Texts;
 
 namespace Notifo.Areas.Api.Controllers.MyController;
 
-[ApiExplorerSettings(GroupName = "CustomAPI")]
+[ApiExplorerSettings(GroupName = "UsersNotifications")]
 public sealed class UsersNotificationsController : BaseController
 {
     private readonly IEventPublisher eventPublisher;
@@ -18,15 +18,14 @@ public sealed class UsersNotificationsController : BaseController
         this.eventPublisher = eventPublisher;
     }
 
-    [HttpPost]
+    [HttpGet]
     [Route("api/usernotification")]
     public async Task<IActionResult> CreateUserNotification()
     {
         // --------------------------------------------- User Creation -----------------------------------
-        var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:1337/api/objects/2");
         var dto = new UpsertUserDto();
-        dto.EmailAddress = "auto@test";
-        dto.PhoneNumber = "1234567890";
+        dto.EmailAddress = "";
+        dto.PhoneNumber = "";
         dto.Id = dto.EmailAddress + "|" + dto.PhoneNumber;
         var command = dto.ToUpsert();
         command.AppId = "044ea419-9250-49c9-84da-d9c6fa4f489a";
@@ -47,11 +46,11 @@ public sealed class UsersNotificationsController : BaseController
         notificationRquest.Preformatted = new NotificationFormattingDto();
         notificationRquest.Preformatted.Subject = new LocalizedText
         {
-            ["en"] = "Subjec str 1"
+            ["en"] = "From Notifo"
         };
         notificationRquest.Preformatted.Body = new LocalizedText
         {
-            ["en"] = "Body str 1"
+            ["en"] = "From Notifo"
         };
 
         var dtoSetting = new ChannelSettingDto();
