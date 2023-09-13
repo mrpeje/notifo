@@ -23,7 +23,7 @@ public sealed partial class SMSGatewaysIntegration : IIntegration
         EditorLabel = "Login",
         EditorDescription = "Login for XML gateway",
         IsRequired = false,
-        Summary = true
+
     };
     public static readonly IntegrationProperty PasswordXMLProperty = new IntegrationProperty("PasswordXML", PropertyType.Text)
     {
@@ -36,32 +36,34 @@ public sealed partial class SMSGatewaysIntegration : IIntegration
         EditorLabel = "XML gateway Enabled",
         EditorDescription = null,
         IsRequired = false,
+        Summary = true
     };
     public static readonly IntegrationProperty LoginSMSCProperty = new IntegrationProperty("LoginSMSC", PropertyType.Text)
     {
-        EditorLabel = Texts.SMSGateway_Login,
-        EditorDescription = null,
+        EditorLabel = "Login",
+        EditorDescription = "SMSC gateway Login",
         IsRequired = false,
-        Summary = true
+
     };
     public static readonly IntegrationProperty PasswordSMSCProperty = new IntegrationProperty("PasswordSMSC", PropertyType.Text)
     {
-        EditorLabel = Texts.SMSGateway_Password,
-        EditorDescription = null,
+        EditorLabel = "Password",
+        EditorDescription = "SMSC gateway Password ",
         IsRequired = false,
     };
     public static readonly IntegrationProperty EnabledSMSCProperty = new IntegrationProperty("EnabledSMSC", PropertyType.Boolean)
     {
-        EditorLabel = Texts.SMSGateway_Enabled,
+        EditorLabel = "SMSC gateway Enabled",
         EditorDescription = null,
         IsRequired = false,
+        Summary = true
     };
     public static readonly IntegrationProperty LoginIntelTeleProperty = new IntegrationProperty("LoginIntelTele", PropertyType.Text)
     {
         EditorLabel = "Login for Intel-Tele client",
         EditorDescription = null,
         IsRequired = false,
-        Summary = true
+
     };
     public static readonly IntegrationProperty PasswordIntelTeleProperty = new IntegrationProperty("PasswordIntelTele", PropertyType.Text)
     {
@@ -74,6 +76,7 @@ public sealed partial class SMSGatewaysIntegration : IIntegration
         EditorLabel = "Enable Intel-Tele gateway",
         EditorDescription = null,
         IsRequired = false,
+        Summary = true
     };
 
 
