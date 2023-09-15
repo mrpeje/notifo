@@ -1,8 +1,10 @@
 ﻿using Notifo.Domain.Integrations.SMSGyteways.Gyteways.Intel_tele;
 using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
+using Notifo.Infrastructure;
+using System.Globalization;
 
 namespace Notifo.Domain.Integrations.SMSGyteway;
-public class IntelTeleGateway : ISMSGateway
+public sealed class IntelTeleGateway : ISMSGateway
 {
     private readonly IHttpClientFactory httpClientFactory;
     public string Login { get; set; }
@@ -25,7 +27,7 @@ public class IntelTeleGateway : ISMSGateway
                 { "username", Login },
                 { "api_key", Password },
                 { "from", From },
-                { "to", message.To },
+                { "to", message.To + " via IntelTeleGateway" },
                 { "message", message.Text },
             };
 
@@ -48,12 +50,14 @@ public class IntelTeleGateway : ISMSGateway
 
                     if (reply.Status.Contains("error", StringComparison.Ordinal))
                     {
-                        return DeliveryResult.Failed(responseContent);
+                        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, reply.Status);
+
+                        throw new DomainException(errorMessage);
                     }
                 }
             }
 
-            return DeliveryResult.Failed("Empty response");
+            return DeliveryResult.Attempt;
         }
     }
 

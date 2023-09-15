@@ -1,16 +1,12 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 using Notifo.Domain.Integrations.SMSGyteways.Gyteways.SMSC;
 using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Notifo.Infrastructure;
+using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Notifo.Domain.Integrations.SMSGyteway;
-public class SMSCGateway : ISMSGateway
+public sealed class SMSCGateway : ISMSGateway
 {
 
     private readonly IHttpClientFactory httpClientFactory;
@@ -33,7 +29,7 @@ public class SMSCGateway : ISMSGateway
                 Login = Login,
                 Password = Password,
                 To = message.To,
-                Message = message.Text,
+                Message = message.Text + " via SMSCGateway",
             };
 
             var jsonContent = JsonConvert.SerializeObject(request);
@@ -50,15 +46,22 @@ public class SMSCGateway : ISMSGateway
                     {
                         if (responseBody.NumberError != null)
                         {
+                            var errorString = string.Empty;
                             foreach (var error in responseBody.NumberError)
                             {
-                                return DeliveryResult.Failed(error.Key + ":" + error.Value);
+                                errorString += error.Key + ":" + error.Value;
                             }
+
+                            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms {1}", errorString);
+                            
+                            throw new DomainException(errorMessage);
                         }
 
                         if (!string.IsNullOrEmpty(responseBody.ErrorCode))
                         {
-                            return DeliveryResult.Failed(responseBody.ErrorCode + " " + responseBody.Error);
+                            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, responseBody.ErrorCode);
+                            
+                            throw new DomainException(errorMessage);
                         }
 
                         // If no errors found and count of sended sms > 0 take it as success
@@ -68,13 +71,15 @@ public class SMSCGateway : ISMSGateway
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    return DeliveryResult.Failed("Failed parse response");
+                    var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown ", message.To, ex.Message);
+                    
+                    throw new DomainException(errorMessage);
                 }
             }
 
-            return DeliveryResult.Failed("Empty response");
+            return DeliveryResult.Attempt;
         }
     }
 }
