@@ -1,4 +1,6 @@
 ﻿using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
+using Notifo.Infrastructure;
+using System.Globalization;
 
 namespace Notifo.Domain.Integrations.SMSGyteway;
 
@@ -7,14 +9,20 @@ public sealed partial class SMSGatewaysIntegration : ISmsSender // , IIntegratio
     public async Task<DeliveryResult> SendAsync(IntegrationContext context, SmsMessage message,
         CancellationToken ct)
     {
-        // Init and get avalible gateways
+        // Get avalible gateways
         IEnumerable<ISMSGateway> gateways = GetGateways(context);
         // Get gateway by rulles
-        var gateway = smsGatewaysRouter.RouteMessage(message, gateways, ct);
-        // Send SMS via gateway
-        var response = await gateway.SendSMSAsync(message);
+        var gateway = smsGatewaysRouter.RouteMessage(message, gateways);
+        if (gateway != null)
+        {
+            // Send SMS via gateway
+            var response = await gateway.SendSMSAsync(message);
+            return response;
+        }
 
-        return response;
+        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " no active suitable gateways");
+
+        throw new DomainException(errorMessage);
     }
 
     private IEnumerable<ISMSGateway> GetGateways(IntegrationContext context)

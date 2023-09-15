@@ -27,7 +27,7 @@ public sealed class IntelTeleGateway : ISMSGateway
                 { "username", Login },
                 { "api_key", Password },
                 { "from", From },
-                { "to", message.To + " via IntelTeleGateway" },
+                { "to", message.To },
                 { "message", message.Text },
             };
 
