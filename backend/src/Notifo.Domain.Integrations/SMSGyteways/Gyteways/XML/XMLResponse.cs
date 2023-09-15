@@ -10,9 +10,6 @@ public sealed class XMLResponse
 
     [XmlElement("error")]
     public string Error { get; set; }
-
-    [XmlIgnore]
-    public bool Sent { get; set; } = false;
 }
 
 public sealed class Information

@@ -1,15 +1,17 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Xml.Serialization;
-
+using Newtonsoft.Json;
+using Notifo.Domain.Integrations.MessageBird.Implementation;
 using Notifo.Domain.Integrations.SMSGyteways.Gyteways.XML;
 using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
+using Notifo.Infrastructure;
 
 namespace Notifo.Domain.Integrations.SMSGyteway;
-public class XMLGateway : ISMSGateway
+public sealed class XMLGateway : ISMSGateway
 {
     private readonly IHttpClientFactory httpClientFactory;
-    private string SerializedXml { get; set; }
 
     public string Login { get; set; }
     public string Password { get; set; }
@@ -22,33 +24,48 @@ public class XMLGateway : ISMSGateway
 
     public async Task<DeliveryResult> SendSMSAsync(SmsMessage message)
     {
-        SerializeMessage(message);
-        if (!string.IsNullOrEmpty(SerializedXml))
+        using (var httpClient = httpClientFactory.CreateClient("XMLGateway"))
         {
-            var response = PostXMLData("http://77.244.208.166/xml/");
-            if (response != null)
+            string url = "http://77.244.208.166/xml/";
+            var serializedRequest = GetSerializedRequest(message);
+            var content = new StringContent(serializedRequest, Encoding.UTF8, "application/xml");
+
+            var response = await httpClient.PostAsync(url, content);
+
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                if (response.Information.Status.Contains("sent", StringComparison.Ordinal))
-                {
-                    return DeliveryResult.Sent;
-                }
+                var responseStream = await response.Content.ReadAsStreamAsync();
+                var xmlResponse = DeserializeResponse(responseStream);
 
-                if (response.Error != null)
+                if (xmlResponse != null)
                 {
-                    return DeliveryResult.Failed(response.Error);
-                }
+                    if (xmlResponse.Information != null)
+                    {
+                        if (xmlResponse.Information.Status.Contains("send", StringComparison.Ordinal))
+                        {
+                            return DeliveryResult.Sent;
+                        }
 
-                return DeliveryResult.Failed(response.Information.Status);
+                        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, xmlResponse.Information.Status);
+
+                        throw new DomainException(errorMessage);
+                    }
+
+                    if (xmlResponse.Error != null)
+                    {
+                        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, xmlResponse.Error);
+
+                        throw new DomainException(errorMessage);
+                    }
+                }
             }
         }
 
-        return DeliveryResult.Failed("Empty request string");
+        return DeliveryResult.Attempt;
     }
 
-    private void SerializeMessage(SmsMessage message)
+    private string GetSerializedRequest(SmsMessage message)
     {
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(XMLRequest));
-
         var requestSubscriber = new XMLRequestSubscriber();
         requestSubscriber.Phone = message.To;
         requestSubscriber.NumberSMS = 1;
@@ -71,59 +88,35 @@ public class XMLGateway : ISMSGateway
             Security = requestSecurity
         };
 
+        return SerializeRequest(request);
+    }
+
+    private string SerializeRequest(XMLRequest request)
+    {
         using (MemoryStream memoryStream = new MemoryStream())
         {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(XMLRequest));
             xmlSerializer.Serialize(memoryStream, request);
             memoryStream.Position = 0;
-            SerializedXml = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+            return Encoding.UTF8.GetString(memoryStream.ToArray());
         }
     }
 
-    public XMLResponse PostXMLData(string destinationUrl)
-    {
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(destinationUrl);
-        byte[] bytes;
-        bytes = System.Text.Encoding.ASCII.GetBytes(SerializedXml);
-        request.ContentType = "text/xml; encoding='utf-8'";
-        request.ContentLength = bytes.Length;
-        request.Method = "POST";
-
-        Stream requestStream = request.GetRequestStream();
-        requestStream.Write(bytes, 0, bytes.Length);
-        requestStream.Close();
-
-        HttpWebResponse response;
-        response = (HttpWebResponse)request.GetResponse();
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            Stream responseStream = response.GetResponseStream();
-            XMLResponse parsedResponse = ParseResponse(responseStream);
-
-            return parsedResponse;
-        }
-
-        return null;
-    }
-
-    private XMLResponse ParseResponse(Stream responseStream)
+    private XMLResponse DeserializeResponse(Stream responseStream)
     {
         try
         {
             XmlSerializer serializerResponse = new XmlSerializer(typeof(XMLResponse));
             var response = (XMLResponse)serializerResponse.Deserialize(responseStream);
 
-            if (response.Information != null)
-            {
-                response.Sent = true;
-            }
-
             return response;
         }
-        catch (InvalidOperationException execption)
+        catch (Exception ex)
         {
-            return null;
+            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " unknow error", ex.Message);
+
+            throw new DomainException(errorMessage);
         }
     }
-
-   
 }
