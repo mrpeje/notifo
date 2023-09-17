@@ -29,7 +29,7 @@ public sealed class SMSCGateway : ISMSGateway
                 Login = Login,
                 Password = Password,
                 To = message.To,
-                Message = message.Text + " via SMSCGateway",
+                Message = message.Text,
             };
 
             var jsonContent = JsonConvert.SerializeObject(request);
@@ -53,14 +53,14 @@ public sealed class SMSCGateway : ISMSGateway
                             }
 
                             var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms {1}", errorString);
-                            
+
                             throw new DomainException(errorMessage);
                         }
 
                         if (!string.IsNullOrEmpty(responseBody.ErrorCode))
                         {
                             var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, responseBody.ErrorCode);
-                            
+
                             throw new DomainException(errorMessage);
                         }
 
@@ -74,7 +74,7 @@ public sealed class SMSCGateway : ISMSGateway
                 catch (Exception ex)
                 {
                     var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown ", message.To, ex.Message);
-                    
+
                     throw new DomainException(errorMessage);
                 }
             }
