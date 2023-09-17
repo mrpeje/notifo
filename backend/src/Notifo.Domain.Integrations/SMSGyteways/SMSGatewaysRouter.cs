@@ -18,10 +18,10 @@ public sealed class SMSGatewaysRouter : ISMSGatewaysRouter
 
         if (int.TryParse(textSMS, out int _))
         {
-            return GetSpecifiedGateway<XMLGateway>(gateways);
+            return GetSpecifiedGateway<SMSCGateway>(gateways);
         }
 
-        return GetSpecifiedGateway<SMSCGateway>(gateways);
+        return GetSpecifiedGateway<XMLGateway>(gateways);
     }
 
     private static ISMSGateway? GetSpecifiedGateway<T>(IEnumerable<ISMSGateway> gateways)
