@@ -73,7 +73,7 @@ public sealed class SMSCGateway : ISMSGateway
                 }
                 catch (Exception ex)
                 {
-                    var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown ", message.To, ex.Message);
+                    var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown '{0}': {1}", message.To, ex.Message);
 
                     throw new DomainException(errorMessage);
                 }

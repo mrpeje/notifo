@@ -5,6 +5,13 @@ public class ResponseModel
 {
     [JsonProperty("reply")]
     public List<Response> Reply { get; set; }
+
+    [JsonProperty("message")]
+    public string Message { get; set; }
+
+    [JsonProperty("error")]
+    public bool IsError { get; set; }
+
 }
 public class Response
 {

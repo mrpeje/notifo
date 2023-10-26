@@ -114,7 +114,7 @@ public sealed class XMLGateway : ISMSGateway
         }
         catch (Exception ex)
         {
-            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " unknow error", ex.Message);
+            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " unknow error {0}", ex.Message);
 
             throw new DomainException(errorMessage);
         }

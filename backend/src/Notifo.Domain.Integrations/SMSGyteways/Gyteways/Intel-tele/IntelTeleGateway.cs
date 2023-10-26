@@ -35,26 +35,44 @@ public sealed class IntelTeleGateway : ISMSGateway
 
             var response = await httpClient.GetAsync(urlWithParams);
             var responseContent = await response.Content.ReadAsStringAsync();
-
-            var responseBody = Newtonsoft.Json.JsonConvert.DeserializeObject<ResponseModel>(responseContent);
-            if (responseBody != null && responseBody.Reply.Count > 0)
+            try
             {
-                // Process the first response, since there is only 1 number in the request
-                var reply = responseBody.Reply.FirstOrDefault();
-                if (reply != null)
+                var responseBody = Newtonsoft.Json.JsonConvert.DeserializeObject<ResponseModel>(responseContent);
+                if (responseBody != null)
                 {
-                    if (reply.Status.Contains("OK", StringComparison.Ordinal))
+                    if (responseBody.IsError)
                     {
-                        return DeliveryResult.Sent;
-                    }
-
-                    if (reply.Status.Contains("error", StringComparison.Ordinal))
-                    {
-                        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, reply.Status);
+                        var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, responseBody.Message);
 
                         throw new DomainException(errorMessage);
                     }
+
+                    if (responseBody.Reply.Count > 0)
+                    {
+                        // Process the first response, since there is only 1 number in the request
+                        var reply = responseBody.Reply.FirstOrDefault();
+                        if (reply != null)
+                        {
+                            if (reply.Status.Contains("OK", StringComparison.Ordinal))
+                            {
+                                return DeliveryResult.Sent;
+                            }
+
+                            if (reply.Status.Contains("error", StringComparison.Ordinal))
+                            {
+                                var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " failed to send sms to '{0}': {1}", message.To, reply.Status);
+
+                                throw new DomainException(errorMessage);
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown '{0}': {1}", message.To, ex.Message);
+
+                throw new DomainException(errorMessage);
             }
 
             return DeliveryResult.Attempt;
