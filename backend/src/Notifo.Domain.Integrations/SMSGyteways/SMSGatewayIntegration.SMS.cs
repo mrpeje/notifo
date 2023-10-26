@@ -16,7 +16,7 @@ public sealed partial class SMSGatewaysIntegration : ISmsSender // , IIntegratio
         if (gateway != null)
         {
             // Send SMS via gateway
-            var response = await gateway.SendSMSAsync(message);
+            var response = await gateway.SendSMSAsync(message, ct);
             return response;
         }
 

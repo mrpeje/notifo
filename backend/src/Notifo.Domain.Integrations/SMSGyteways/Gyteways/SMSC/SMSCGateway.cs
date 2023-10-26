@@ -18,7 +18,7 @@ public sealed class SMSCGateway : ISMSGateway
         this.httpClientFactory = httpClientFactory;
     }
 
-    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message)
+    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message, CancellationToken ct)
     {
         using (var httpClient = httpClientFactory.CreateClient("SMSCGateway"))
         {
@@ -35,7 +35,7 @@ public sealed class SMSCGateway : ISMSGateway
             var jsonContent = JsonConvert.SerializeObject(request);
             var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var postResponse = await httpClient.PostAsync(postUrl, stringContent);
+            var postResponse = await httpClient.PostAsync(postUrl, stringContent, ct);
             if (postResponse.IsSuccessStatusCode)
             {
                 var contents = await postResponse.Content.ReadAsStringAsync();
@@ -71,9 +71,9 @@ public sealed class SMSCGateway : ISMSGateway
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (JsonSerializationException ex)
                 {
-                    var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown '{0}': {1}", message.To, ex.Message);
+                    var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " deserialization error '{0}': {1}", contents, ex.Message);
 
                     throw new DomainException(errorMessage);
                 }

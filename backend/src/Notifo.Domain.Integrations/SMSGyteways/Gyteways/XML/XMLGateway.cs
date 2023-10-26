@@ -22,7 +22,7 @@ public sealed class XMLGateway : ISMSGateway
         this.httpClientFactory = httpClientFactory;
     }
 
-    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message)
+    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message, CancellationToken ct)
     {
         using (var httpClient = httpClientFactory.CreateClient("XMLGateway"))
         {
@@ -30,7 +30,7 @@ public sealed class XMLGateway : ISMSGateway
             var serializedRequest = GetSerializedRequest(message);
             var content = new StringContent(serializedRequest, Encoding.UTF8, "application/xml");
 
-            var response = await httpClient.PostAsync(url, content);
+            var response = await httpClient.PostAsync(url, content, ct);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -112,9 +112,9 @@ public sealed class XMLGateway : ISMSGateway
 
             return response;
         }
-        catch (Exception ex)
+        catch (JsonSerializationException ex)
         {
-            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " unknow error {0}", ex.Message);
+            var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " deserialization error {0}", ex.Message);
 
             throw new DomainException(errorMessage);
         }

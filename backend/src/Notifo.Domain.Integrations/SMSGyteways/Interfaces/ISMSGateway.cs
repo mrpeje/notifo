@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 namespace Notifo.Domain.Integrations.SMSGyteways.Interfaces;
 public interface ISMSGateway
 {
-    public Task<DeliveryResult> SendSMSAsync(SmsMessage message);
+    public Task<DeliveryResult> SendSMSAsync(SmsMessage message, CancellationToken ct);
 }

@@ -1,4 +1,5 @@
-﻿using Notifo.Domain.Integrations.SMSGyteways.Gyteways.Intel_tele;
+﻿using Newtonsoft.Json;
+using Notifo.Domain.Integrations.SMSGyteways.Gyteways.Intel_tele;
 using Notifo.Domain.Integrations.SMSGyteways.Interfaces;
 using Notifo.Infrastructure;
 using System.Globalization;
@@ -16,7 +17,7 @@ public sealed class IntelTeleGateway : ISMSGateway
         this.httpClientFactory = httpClientFactory;
     }
 
-    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message)
+    public async Task<DeliveryResult> SendSMSAsync(SmsMessage message, CancellationToken ct)
     {
         using (var httpClient = httpClientFactory.CreateClient("IntelTeleGateway"))
         {
@@ -33,7 +34,7 @@ public sealed class IntelTeleGateway : ISMSGateway
 
             var urlWithParams = url + ToQueryString(parameters);
 
-            var response = await httpClient.GetAsync(urlWithParams);
+            var response = await httpClient.GetAsync(urlWithParams, ct);
             var responseContent = await response.Content.ReadAsStringAsync();
             try
             {
@@ -68,9 +69,9 @@ public sealed class IntelTeleGateway : ISMSGateway
                     }
                 }
             }
-            catch (Exception ex)
+            catch (JsonSerializationException ex)
             {
-                var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " error unknown '{0}': {1}", message.To, ex.Message);
+                var errorMessage = string.Format(CultureInfo.CurrentCulture, this.GetType().Name + " deserialization error '{0}': {1}", responseContent, ex.Message);
 
                 throw new DomainException(errorMessage);
             }
